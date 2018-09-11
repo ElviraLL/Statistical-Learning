@@ -1,1 +1,1 @@
-# Chapter3 Linear Regression
+# Chapter 3 Linear Regression
