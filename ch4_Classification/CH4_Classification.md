@@ -132,24 +132,122 @@ $$p(X) = \frac{e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}{1 + e^{\beta_0 
 
 
 
- ## Discriminant Analysis
+ ## Discriminant Analysis（a different classification method）
 
+### What is Discriminant Analysis
 
+*  Model the distribution if $X$ in each of the classes separately, and then use <span style="color:green">Bayes theorem</span> to flip things around and obtain $Pr(Y|X)$ 
 
- 
+* When we use normal distributions for each class, this leads to linear or quadratic discriminant analysis
+
+* Other distributions can be used as well.
+
+   
+
+### Bayes Theorem for Classification
+
+*  Bayes Theorem:
+
+  ​	 $Pr(Y = k | X = x) = \frac{Pr(X = x | Y = k) \cdot Pr(Y = k)}{Pr(X=x)}$  
+
+* $Pr(Y = k | X = x) = \frac{\pi_k f_k(x)}{\sum_{l = 1}^Kf_l(x)}$, where 
+  * $f_k(x) = Pr(X=x|y=k)$ is the  <span style="color:green">density</span> for $X$ in class $k$. Here we will use normal densities for these, esparately in each class.
+  * $\pi_k = Pr(Y = k)$ is the marginal or <span style="color:green">prior</span> probability for class $k$. 
+* ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/discriminant.png?raw=trueg)
+* When the classes are <span style="color:red">well-separated</span>, the parameter estimates for the <span style="color:red">logistic regression model are suprisingly unstable</span>. Linear discriminant analysis does not suffer from thie problem.
+* If <span style="color:red"> is small and the distribution of the predictors  is approximately normal</span> in each of the classes, the linear discriminant model is again more stable than the logistic regression model.
+* Linear discriminant analysis is <span style="color:red">popular when we have more than two reponse classes</span>, because it also provides low-dimensional views of the data. 
 
  
 
 ## Gaussian Discriminant - One Variable
 
- 
+### Linear Discriminant Analysis when $p = 1$
+
+*  The Gaussian density has the form 
+  * $f_k(x) = \frac{1}{\sqrt{2\pi}\sigma_k}e^{-\frac{1}{2}\left(\frac{x-\mu_k}{\sigma_k}\right)^2}$ We will assume that all the $\sigma_k = \sigma$ are the same
+  * Plugging this into Bayes formula, we get a rather complex cpmpression for $p_k(x) = Pr(Y = k | X = x)$:
+    * $p_k = \frac{\pi_k \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}\left(\frac{x-\mu_k}{\sigma}\right)^2}}{\sum_{l = 1}^K \pi_l \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{1}{2}\left(\frac{x-\mu_l}{\sigma}\right)^2} }$ 
+    * To classifiy at the value $X = x$, we need to see which of the $p_k(x)$ is largest. Taking logs, and discarding terms that do not depend on $k$  we see that this is equivalent to assigning $x$  to the class with the largest <span style="color:green">discriminant score</span>:
+      * $\delta_k(x) = x\cdot\frac{\mu_k}{\sigma^2} - \frac{\mu_k^2}{2\sigma^2} + log(\pi_k)$ 
+      * $\delta_k(x)$  is a <span style="color:green">linear</span> function of $x$   
+    * If there are $K = 2$  classes and $\pi_1 = \pi_2 = 0.5$, then one can see that the <span style="color:green">decision boundary</span> is at 
+      * $x = \frac{\mu_1 + \mu_2}{2}$ 
+      * ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/exampledisc.png?raw=true)
+      * we need to estimate the means and the stand deviation
+      *  ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/estimating.png?raw=true)
+      * pooled variance estimate.
 
  
 
 ## Gaussian Discriminant - Many Variables
 
- 
+ ### Linear Discriminant Analysis when $p > 1$
+
+* ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/gaussian2d.png?raw=true)
+
+* 2D gaussian: bell function
+* example：
+  * ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/p=2K=3.png?raw=true)
+  * ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/irisDATA.png?raw=true)
+  * ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/DiscriminantPlot.png?raw=true)
+  * Once we have estimates $\hat{\delta_k}(x)$ , we can turn these into estimates for class probabilities:
+    * $\hat{Pr}(Y = k | X = x) = \frac{e^{\hat{\delta_k}(x)} }{\sum_{l = 1}^K e^{\hat{\delta_l}(X)}}$   
+  * so classifying to the largest $\hat{\delta_k(x)}$amounts to classifying to the class for which $\hat{Pr}(Y=k | X=x)$ is largest .
+* example:
+  * ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/confusionmatrix.png?raw=true)
+
+### Type of errors
+
+* <span style="color:blue">False positive rate:</span> The fraction of negative examples that are classified as positive --- 0.2% in example
+* <span style="color:blue">False negative rate:</span> The fraction of positive examples that are classified as negative --- 75.7% in example
+* We produced this table by classifying to class <span style="color:red">yes</span> if 
+  * $\hat{Pr}(\color{red}{\text{Default = Yes}}|\color{red}{\text{Balance, Student}}) \ge 0.5$  
+* We can change the two error rates by changing the threshold from 0.5 to some other value in [0,1]:
+  * $\hat{Pr}(\color{red}{\text{Default = Yes}}|\color{red}{\text{Balance, Student}}) \ge threshold$
+  * and vary $threshold$
+  * ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/varyingthethreshold.png?raw=true)
+  * ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/ROC.png?raw=true)
+  * ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/Roc2.png?raw=true)
+  * The Total Error is a weighted average of the False Positive Rate and False Negative Rage. The weights are determined by the Prior Probabilities of Positive and Negative Responses。
 
 ## Quadratic Discriminant Analyss and Naive Bayes
 
- 
+ ### Other forms of Discriminant Analysis
+
+* By altering the forms for $f_k(x)$, we get different classifiers
+  * With Gaussian but different $\Sigma_k$ in each class, we get <span style="color:green">quadratic discriminant analysis</span>.
+  * With $f_k(x) = \prod_{j=1}^p f_{jk}(x_j)$  (conditional independence model) in each class we get <span style="color:green">naive Bayes</span>. For Gaussian this means the $\Sigma_k$ are diagonal. (independent features)
+  * We end up with quiet flattened and maybe biased estimates for the probabilities, but in terms of classificatin, you just need to know which probability's the largest to classify it. So you can tolerate quite a lot of bias and still get good classification performance.
+  * And what you get in return is much reduced variance from having to estimate far fewer parameters.
+  * Many other forms, by proposing specific density models for $f_k(x)$ , including nonparametric approaches.
+  * example:
+    * ![](https://github.com/JingwenLiang/Statistical-Learning/blob/master/ch4_Classification/quadratic.png?raw=true) 
+
+### Naive Bayes
+
+* Assumes features are independent in each class.
+* useful when p is large, and so multivariate methods like QDA and even LDA break down
+  * Gaussian naive Bayes assumes each $\Sigma_k$ is diagonal:
+    * $\begin{align*}\delta_k(x)  &\propto \log\left[\pi_k \prod_{j = 1}^p f_{kj}(x_j)\right] \\&=-\frac{1}{2}\sum_{j=1}^p\left[\frac{(x_j-\mu_{kj})^2}{\sigma_{kj}} + \log \sigma^2_{kj}\right] + \log \pi_k\end{align*}$
+    * can use for <span style="color:green">mixed</span> feature vectors(qualitative and quantitative). If $X_j$ is qualitative, replace $f_{kj}(x_j)$  with probability mass function (histogram) over discrete categories.
+  * Despite strong assumptions, naive Bayes often produces good classification results.
+
+### Logistic Regression versus LDA
+
+* For a two-class problem, one can show that for LDA
+  * $\log\left(\frac{p_1(x)}{1-p_1(x)}\right) = \log \left(\frac{p_1(x)}{p_2(x)}\right) = c_0 + c_1x_1 + \cdots + c_px_p$
+  * so it has the same form as logistic regression.
+* The difference is in how the parameters are estimated.
+  * Logistic regression uses the conditional likelihood based on $Pr(Y|X)$ (known as <span style="color:green">discriminative learning</span>) 
+  * LDA uses the full likelihood based on $Pr(X, Y)$ (konwn as <span style="color:green">generative learning</span>)
+  * Despite these differences, in practice the results are often very similar.
+* logistic regression can also fit quadratic boundaries like QDA, by explicity including quadratic terms in the model.
+
+
+
+## Summary
+
+*  Logistic regression is very popular for classification especially when $K=2$
+* LDA is useful when $n$ is small, or the classes are vell separated, and Gaussian assumptions are reasonable. Also when $K>2$ 
+* Naive Bayes is useful when $p$  is very large. 
